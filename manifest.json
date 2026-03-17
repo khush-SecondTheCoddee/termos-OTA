@@ -5,20 +5,16 @@
   },
   "files": {
     "auth.py": {
-      "ver": 1.0,
-      "hash": "optional_hash_here"
+      "ver": 1.0
     },
     "shell.py": {
-      "ver": 1.2,
-      "hash": "optional_hash_here"
+      "ver": 2.0
     },
     "tools.py": {
-      "ver": 1.0,
-      "hash": "optional_hash_here"
+      "ver": 1.0
     },
     "store.py": {
-      "ver": 1.1,
-      "hash": "optional_hash_here"
+      "ver": 1.0
     }
   }
 }
