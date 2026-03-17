@@ -26,14 +26,15 @@ class AppStore:
             print(f"{R}[!] Store Offline.{W}")
             return None
 
-    def install_app(self, app_name, app_info):
-        try:
-            print(f"{Y}[*] Installing {app_name}...{W}")
-            res = requests.get(self.repo_raw + "modules/" + app_name)
-            if res.status_code == 200:
-                # Save the file
-                with open(os.path.join(self.module_dir, app_name), "w") as f:
-                    f.write(res.text)
+        # Update inside store.py
+def install_app(self, app_name, app_info):
+    # Use the specific path defined in catalog.json
+    download_url = self.repo_raw + app_info["path"]
+    res = requests.get(download_url)
+    # Still saves into the phone's modules/ folder for easy execution
+    with open(os.path.join(self.module_dir, app_name), "w") as f:
+        f.write(res.text)
+
                 
                 # Update local manifest so the Kernel recognizes it
                 if os.path.exists(self.local_manifest):
