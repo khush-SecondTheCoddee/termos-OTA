@@ -2,18 +2,20 @@ import os
 import requests
 import json
 import time
+import importlib.util
 
-# UI COLORS
+# --- UI COLORS ---
 G = '\033[92m' ; R = '\033[91m' ; B = '\033[94m' 
 Y = '\033[93m' ; C = '\033[96m' ; W = '\033[0m'
 
 class AppStore:
     def __init__(self):
-        # You can create a second file on GitHub called 'catalog.json' for the store
-        self.repo_raw = "https://raw.githubusercontent.com/khush-SecondTheCoddee/termos-OTA/main/"
-        self.catalog_url = self.repo_raw + "catalog.json"
+        self.repo_owner = "khush-SecondTheCoddee"
+        self.repo_name = "termos-OTA"
+        self.raw_url = f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/main/"
+        self.catalog_url = self.raw_url + "catalog.json"
         self.module_dir = "modules"
-        self.local_manifest = ".sys_manifest.json"
+        self.local_manifest_path = ".sys_manifest.json"
 
     def get_catalog(self):
         try:
@@ -22,55 +24,76 @@ class AppStore:
             if res.status_code == 200:
                 return res.json()
             return None
-        except:
-            print(f"{R}[!] Store Offline.{W}")
+        except Exception as e:
+            print(f"{R}[!] Store Offline: {e}{W}")
             return None
 
-        # Update inside store.py
-def install_app(self, app_name, app_info):
-    # Use the specific path defined in catalog.json
-    download_url = self.repo_raw + app_info["path"]
-    res = requests.get(download_url)
-    # Still saves into the phone's modules/ folder for easy execution
-    with open(os.path.join(self.module_dir, app_name), "w") as f:
-        f.write(res.text)
-
+    def install_app(self, app_filename, app_info):
+        try:
+            # Construct the download URL from the 'path' in catalog.json
+            download_url = self.raw_url + app_info["path"]
+            
+            print(f"{Y}[*] Downloading {app_filename}...{W}")
+            res = requests.get(download_url, timeout=10)
+            
+            if res.status_code == 200:
+                # Save into the local modules folder
+                local_path = os.path.join(self.module_dir, app_filename)
+                with open(local_path, "w") as f:
+                    f.write(res.text)
                 
-                # Update local manifest so the Kernel recognizes it
-                if os.path.exists(self.local_manifest):
-                    with open(self.local_manifest, "r") as f:
+                # Update local manifest so the Kernel tracks this new file
+                if os.path.exists(self.local_manifest_path):
+                    with open(self.local_manifest_path, "r") as f:
                         data = json.load(f)
-                    data["files"][app_name] = {"ver": app_info["ver"]}
-                    with open(self.local_manifest, "w") as f:
+                    
+                    data["files"][app_filename] = {"ver": app_info["ver"]}
+                    
+                    with open(self.local_manifest_path, "w") as f:
                         json.dump(data, f)
                 
-                print(f"{G}✔ {app_name} installed successfully!{W}")
+                print(f"{G}✔ {app_filename} installed successfully!{W}")
+                time.sleep(1)
             else:
-                print(f"{R}[!] Download failed.{W}")
+                print(f"{R}[!] Download failed (HTTP {res.status_code}).{W}")
         except Exception as e:
-            print(f"{R}[!] Error: {e}{W}")
+            print(f"{R}[!] Installation Error: {e}{W}")
 
     def menu(self):
+        os.system('clear')
         catalog = self.get_catalog()
-        if not catalog: return
+        if not catalog: 
+            print(f"{R}Could not load catalog. Check your internet.{W}")
+            time.sleep(2)
+            return
 
-        print(f"\n{C}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓{W}")
-        print(f"{C}┃   TermuxPro App Store        ┃{W}")
-        print(f"{C}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛{W}")
+        print(f"{C}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓{W}")
+        print(f"{C}┃        TERMUX-PRO OFFICIAL STORE       ┃{W}")
+        print(f"{C}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛{W}")
         
-        apps = list(catalog["apps"].keys())
-        for i, app in enumerate(apps):
-            desc = catalog["apps"][app]["desc"]
-            print(f"{Y}{i+1}.{W} {G}{app}{W} - {desc}")
+        apps_list = list(catalog["apps"].keys())
         
-        print(f"\n{B}Type the number to install or 'q' to exit.{W}")
+        for i, app_name in enumerate(apps_list):
+            info = catalog["apps"][app_name]
+            print(f"{Y}{i+1}.{W} {G}{app_name:15}{W} | {info['desc']}")
+        
+        print(f"\n{B}Enter number to install, or 'q' to go back.{W}")
         choice = input(f"{C}store » {W}").strip()
         
-        if choice.isdigit() and int(choice) <= len(apps):
-            selected = apps[int(choice)-1]
-            self.install_app(selected, catalog["apps"][selected])
-        elif choice.lower() == 'q':
+        if choice.lower() == 'q':
             return
+        
+        if choice.isdigit():
+            idx = int(choice) - 1
+            if 0 <= idx < len(apps_list):
+                selected_app = apps_list[idx]
+                self.install_app(selected_app, catalog["apps"][selected_app])
+            else:
+                print(f"{R}Invalid selection.{W}")
+                time.sleep(1)
+        else:
+            print(f"{R}Invalid input.{W}")
+            time.sleep(1)
 
 def main():
     store = AppStore()
