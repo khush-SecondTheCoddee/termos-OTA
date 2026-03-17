@@ -1,8 +1,24 @@
 {
-  "flags": { "NECESSARY": true },
+  "flags": {
+    "NECESSARY": true,
+    "LOCKDOWN": false
+  },
   "files": {
-    "shell.py": {"ver": 1.0},
-    "auth.py": {"ver": 1.2},
-    "tools.py": {"ver": 1.0}
+    "auth.py": {
+      "ver": 1.0,
+      "hash": "optional_hash_here"
+    },
+    "shell.py": {
+      "ver": 1.2,
+      "hash": "optional_hash_here"
+    },
+    "tools.py": {
+      "ver": 1.0,
+      "hash": "optional_hash_here"
+    },
+    "store.py": {
+      "ver": 1.0,
+      "hash": "optional_hash_here"
+    }
   }
 }
