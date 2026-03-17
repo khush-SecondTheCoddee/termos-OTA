@@ -1,0 +1,19 @@
+{
+  "apps": {
+    "weather.py": {
+      "ver": 1.0,
+      "path": "apps/weather.py",
+      "desc": "Live weather reports via WTTR.in"
+    },
+    "calc.py": {
+      "ver": 1.1,
+      "path": "apps/calc.py",
+      "desc": "Advanced Math & Unit Converter"
+    },
+    "clock.py": {
+      "ver": 1.0,
+      "path": "apps/clock.py",
+      "desc": "Full-screen digital terminal clock"
+    }
+  }
+}
